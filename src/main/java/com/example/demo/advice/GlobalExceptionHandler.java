@@ -12,6 +12,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
@@ -19,12 +20,14 @@ import javax.servlet.http.HttpServletRequest;
 import java.nio.file.AccessDeniedException;
 
 
+@RestController
 @RequiredArgsConstructor
 @RestControllerAdvice
 @Slf4j
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler{
 
     private final ResponseService responseService;
+
 
     /**
      * javax.validation.Valid or @Validated 으로 binding error 발생시 발생한다.
@@ -32,9 +35,12 @@ public class GlobalExceptionHandler {
      * 주로 @RequestBody, @RequestPart 어노테이션에서 발생
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    protected ResponseEntity<MethodError> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error("handleMethodArgumentNotValidException", e);
-        final ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE);
+        final String bindingResult = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
+        final MethodError response = MethodError.methodError(ErrorCode.INVALID_INPUT_VALUE, bindingResult);
+
+        System.out.println(bindingResult);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -140,5 +146,13 @@ public class GlobalExceptionHandler {
         return responseService.getNameFormatResult();
     }
 
+
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex){
+//        Map<String, String> errors = new HashMap<>();
+//        ex.getBindingResult().getAllErrors()
+//                .forEach(c -> errors.put(((FieldError) c).getField(), c.getDefaultMessage()));
+//        return ResponseEntity.badRequest().body(errors);
+//    }
 
 }

@@ -1,10 +1,11 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.UsersEntity;
-import com.example.demo.response.CommonResult;
 import com.example.demo.service.UsersServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 
 @RestController
@@ -17,7 +18,7 @@ public class UsersController {
 
     //유저추가
     @PostMapping(value="/users")
-    public Object join(@RequestBody UsersEntity usersEntity){
+    public Object join(@Valid @RequestBody UsersEntity usersEntity){
 
         return usersServiceImpl.join(usersEntity);
     }

@@ -20,22 +20,8 @@ public class UsersServiceImpl implements UsersService {
     @Override
     public Object join(UsersEntity usersEntity) {
 
-        String telRegExp = "^01(?:0|1|[6-9])[.-]?(\\d{3}|\\d{4})[.-]?(\\d{4})$";
-        String emailRegExp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
-        String nameRegExp = "^[가-힣]{2,10}$";
-
         int telCount = usersRepository.countByTel(usersEntity.getTel());
         int emailCount = usersRepository.countByEmail(usersEntity.getEmail());
-
-        //유효성검사
-        if (usersEntity.getTel().matches(telRegExp) == false) {
-            return responseService.getTelFormatResult();
-        } else if (usersEntity.getEmail().matches(emailRegExp) == false) {
-            return responseService.getEmailFormatResult();
-        } else if (usersEntity.getName().matches(nameRegExp) == false){
-            return responseService.getNameFormatResult();
-        }
-
 
         //중복데이터검사
         if (telCount > 0) {
@@ -44,14 +30,12 @@ public class UsersServiceImpl implements UsersService {
         } else if (emailCount > 0) {
             return responseService.getEmailFailResult();
 
-        } else if (usersEntity.getTel().matches(telRegExp) == true &
-                    usersEntity.getEmail().matches(emailRegExp) == true &
-                        usersEntity.getName().matches(nameRegExp) == true) {
+        } else{
             usersRepository.save(usersEntity);
             return new ResponseEntity<>(responseService.createSuccessResult(), (HttpStatus.CREATED));
         }
-        return null;
     }
+
 
 
     //Like 검색
